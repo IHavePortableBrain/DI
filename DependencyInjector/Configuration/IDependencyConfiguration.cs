@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DependencyInjector.Configuration
 {
-    internal interface IDependencyConfiguration
+    public interface IDependencyConfiguration
     {
         void Register<TDependency, TImplementation>(bool isSingleton = false, string name = null)
             where TDependency : class

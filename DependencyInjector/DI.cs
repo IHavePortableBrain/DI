@@ -9,13 +9,20 @@ namespace DependencyInjector
 {
     public class DI : IDI
     {
+        private readonly IDependencyConfiguration Configuration;
+
         public TDependency Resolve<TDependency>(string name = null) where TDependency : class
         {
-            throw new NotImplementedException();
+            Type dependencyType = typeof(TDependency);
+
+            IEnumerable<Implementation> impls = Configuration.GetImplementations(dependencyType);
+
+            return (TDependency)Activator.CreateInstance(impls.First().Type);
         }
 
-        public DI(DependencyConfiguration configuration)
+        public DI(IDependencyConfiguration configuration)
         {
+            this.Configuration = configuration;
         }
     }
 }

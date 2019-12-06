@@ -158,6 +158,23 @@ namespace DependencyInjector.Test
         [TestMethod]
         public void DependencyHasDependenciesTest()
         {
+            configuration.Register<I, DependentImpl>();
+
+            DI = new DI(configuration);
+            var actual = DI.Resolve<I>();
+
+            Assert.AreEqual(typeof(DependentImpl), actual.GetType());
+        }
+
+        [TestMethod]
+        public void RecursiveDependenciesTest()
+        {
+            configuration.Register<I, RecursiveImpl>();
+
+            DI = new DI(configuration);
+            var actual = DI.Resolve<I>();
+
+            Assert.AreEqual(typeof(RecursiveImpl), actual.GetType());
         }
 
         [TestMethod]
@@ -167,17 +184,21 @@ namespace DependencyInjector.Test
 
             DI = new DI(configuration);
 
-            Assert.ReferenceEquals(DI.Resolve<I>(), DI.Resolve<I>());
+            var first = DI.Resolve<I>();
+            var second = DI.Resolve<I>();
+            Assert.AreSame(first, second);
         }
 
         [TestMethod]
-        public void InstanceFoeEachResolveTest()
+        public void InstanceForEachResolveTest()
         {
             configuration.Register<I, Impl1>();
 
             DI = new DI(configuration);
 
-            Assert.AreNotSame(DI.Resolve<I>(), DI.Resolve<I>());
+            var first = DI.Resolve<I>();
+            var second = DI.Resolve<I>();
+            Assert.AreNotSame(first, second);
         }
 
         [TestMethod]

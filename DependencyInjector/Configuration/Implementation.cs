@@ -8,7 +8,7 @@ namespace DependencyInjector.Configuration
 
         public bool IsSingleton { get; private set; }
 
-        public object SingletonInstance { get; private set; }
+        public object SingletonInstance { get; set; }
 
         public string Name { get; private set; }
 
