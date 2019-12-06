@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,9 +16,35 @@ namespace DependencyInjector
         {
             Type dependencyType = typeof(TDependency);
 
-            IEnumerable<Implementation> impls = Configuration.GetImplementations(dependencyType);
+            return (TDependency)Resolve(dependencyType, name);
+        }
 
-            return (TDependency)Activator.CreateInstance(impls.First().Type);
+        private object Resolve(Type dependency, string name)
+        {
+            Implementation[] impls;
+
+            if (typeof(IEnumerable).IsAssignableFrom(dependency))
+            {
+                Type dependencyType = dependency.GetGenericArguments()[0];
+                impls = Configuration.GetImplementations(dependencyType).ToArray();
+
+                //create array of Ts (when dependency is IEnumerable<T>)
+                var implInstances = (object[])Activator.CreateInstance(dependencyType.MakeArrayType(), new object[] { impls.Count() });
+                for (int i = 0; i < impls.Count(); i++)
+                {
+                    implInstances[i] = Resolve(impls[i].Type, name);
+                }
+                return implInstances;
+            }
+
+            impls = Configuration.GetImplementations(dependency)?.ToArray();
+            if (impls != null)
+            {
+                return Activator.CreateInstance(impls.First().Type);
+            }
+
+            //no implementation for that dependency, try make it instance
+            return Activator.CreateInstance(dependency);
         }
 
         public DI(IDependencyConfiguration configuration)

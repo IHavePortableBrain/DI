@@ -19,7 +19,8 @@ namespace DependencyInjector.Configuration
         //use it to set singleton instance for implementation
         public IEnumerable<Implementation> GetImplementations(Type type)
         {
-            return ImplsByDependencyType[type];
+            ImplsByDependencyType.TryGetValue(type, out List<Implementation> result);
+            return result;
         }
 
         public void Register<TDependency, TImplementation>(bool isSingleton = false, string name = null)
@@ -52,7 +53,8 @@ namespace DependencyInjector.Configuration
             if (!dependency.IsAssignableFrom(implementation))
                 throw new ArgumentException("Invalid dependency registration types");
 
-            if (!dependency.IsClass || implementation.IsAbstract)
+            if (!dependency.IsClass && !dependency.IsInterface
+                || implementation.IsAbstract)
                 throw new ArgumentException("Invalid dependency registration types");
         }
     }
