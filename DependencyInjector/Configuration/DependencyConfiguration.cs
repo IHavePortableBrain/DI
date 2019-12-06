@@ -49,6 +49,11 @@ namespace DependencyInjector.Configuration
 
         private void ValidateRegistration(Type dependency, Type implementation, bool isSingleton, string name)
         {
+            if (!dependency.IsAssignableFrom(implementation))
+                throw new ArgumentException("Invalid dependency registration types");
+
+            if (!dependency.IsClass || implementation.IsAbstract)
+                throw new ArgumentException("Invalid dependency registration types");
         }
     }
 }
