@@ -11,7 +11,7 @@ namespace DependencyInjector.Test.Class
             throw new NotImplementedException();
         }
 
-        public DependentImpl(NotImpl notImpl)
+        public DependentImpl(NotImpl notImpl, int int1)
         {
         }
     }

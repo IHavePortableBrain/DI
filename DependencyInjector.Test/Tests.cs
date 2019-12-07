@@ -29,6 +29,7 @@ namespace DependencyInjector.Test
         }
 
         [TestMethod]
+        [ExpectedException(typeof(MissingMethodException))]
         public void NoImplementationForSuchDependencyTest()
         {
             DI = new DI(configuration);
@@ -167,14 +168,13 @@ namespace DependencyInjector.Test
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void RecursiveDependenciesTest()
         {
             configuration.Register<I, RecursiveImpl>();
 
             DI = new DI(configuration);
             var actual = DI.Resolve<I>();
-
-            Assert.AreEqual(typeof(RecursiveImpl), actual.GetType());
         }
 
         [TestMethod]
