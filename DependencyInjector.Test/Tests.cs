@@ -228,19 +228,20 @@ namespace DependencyInjector.Test
         [TestMethod]
         public void ExplicitConstructorParameterImplementationNameTest()
         {
-            configuration.Register<I, Impl1>(name: "1");
             configuration.Register<I, Impl2>(name: "2");
+            configuration.Register<I, Impl1>(name: "1");
+            configuration.Register<NamedDependencyConstructorImpl, NamedDependencyConstructorImpl>();
+            configuration.Register<BadNamedDependencyConstructorImpl, BadNamedDependencyConstructorImpl>();
 
             DI = new DI(configuration);
 
-            var actual = DI.Resolve<I>("1");
-            Assert.AreEqual(typeof(Impl1), actual.GetType());
+            var actual = DI.Resolve<NamedDependencyConstructorImpl>();
+            Assert.AreEqual(typeof(Impl1), actual.I1.GetType());
+            Assert.AreEqual(typeof(Impl2), actual.I2.GetType());
 
-            actual = DI.Resolve<I>("2");
-            Assert.AreEqual(typeof(Impl2), actual.GetType());
-
-            actual = DI.Resolve<I>("notRegisteredName");
-            Assert.AreEqual(null, actual);
+            var actual2 = DI.Resolve<BadNamedDependencyConstructorImpl>();
+            Assert.AreEqual(null, actual2.I1);
+            Assert.AreEqual(typeof(Impl2), actual2.I2.GetType());
         }
     }
 }

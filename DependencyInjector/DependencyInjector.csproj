@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="Configuration\IDependencyConfiguration.cs" />
     <Compile Include="Configuration\Implementation.cs" />
+    <Compile Include="DependencyKeyAttribute.cs" />
     <Compile Include="DI.cs" />
     <Compile Include="Configuration\DependencyConfiguration.cs" />
     <Compile Include="IDI.cs" />

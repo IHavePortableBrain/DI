@@ -107,7 +107,10 @@ namespace DependencyInjector
                 try
                 {
                     foreach (var pi in pis)
-                        parameters.Add(Resolve(pi.ParameterType));
+                    {
+                        string dependencyExplictName = (string)pi.GetCustomAttribute<DependencyKeyAttribute>()?.Name;
+                        parameters.Add(Resolve(pi.ParameterType, dependencyExplictName));
+                    }
 
                     result = Activator.CreateInstance(type, parameters.ToArray());
 
