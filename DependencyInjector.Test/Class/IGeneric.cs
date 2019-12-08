@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DependencyInjector.Test.Class
 {
-    internal interface IGeneric<T> where T : IEnumerable
+    internal interface IGeneric<out T> where T : IEnumerable
     {
         void DoIt();
     }

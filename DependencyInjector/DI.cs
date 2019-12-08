@@ -20,7 +20,17 @@ namespace DependencyInjector
         {
             Type dependencyType = typeof(TDependency);
 
-            return (TDependency)Resolve(dependencyType, name);
+            var result = Resolve(dependencyType, name);
+
+            //Type resType = result.GetType();
+            //Type depType = typeof(TDependency);
+            //if (resType.IsGenericType)
+            //{
+            //    depType.GetGenericArguments
+            //    resType.GetGenericTypeDefinition().
+            //}
+
+            return (TDependency)result;//will cause cast error for generic dependencies wich are not covariant to their generic arguments
         }
 
         private object Resolve(Type dependency, string name = null)
@@ -52,7 +62,6 @@ namespace DependencyInjector
             }
             atResolvingTypes.Push(dependency);
 
-            //TODO: rewrite with push type to stack at the begining, and pop rigth before return. To get rid of stackoverflow
             if (dependency.IsPrimitive
                 || !dependency.IsClass && !dependency.IsInterface)//isenum, isStruct
                 result = Activator.CreateInstance(dependency);
@@ -73,9 +82,11 @@ namespace DependencyInjector
             else
             {
                 impls = Configuration.GetImplementations(dependency)?.ToArray();
+                if (impls == null && dependency.IsGenericType)//handle search for open generic types impls as well
+                    impls = Configuration.GetImplementations(dependency.GetGenericTypeDefinition())?.ToArray();
                 if (impls != null)
                 {
-                    result = Resolve(impls.First().Type);
+                    result = Resolve(impls.First().Type); //TODO: resolve dependency on GenericType of impl of open generic dependency
                 }
                 else //no implementation for that dependency, try make its instance
                     result = CreateByConstructor(dependency);
@@ -88,6 +99,8 @@ namespace DependencyInjector
         private object CreateByConstructor(Type type)
         {
             object result = null;
+
+            ResolveIfContainsGenericParameter(ref type);
 
             ConstructorInfo[] cis = type.GetConstructors();
             foreach (var ci in cis)
@@ -112,6 +125,23 @@ namespace DependencyInjector
             }
 
             return result;
+        }
+
+        private void ResolveIfContainsGenericParameter(ref Type type)
+        {
+            if (type.ContainsGenericParameters)
+            {
+                Type[] toResolve = type.GetGenericArguments();
+
+                Type[] genericParameters = toResolve.Select(dep =>
+                {
+                    var impls = Configuration.GetImplementations(dep.BaseType)?.ToArray();
+                    return impls != null ? impls.First().Type : dep.BaseType;
+                })
+                .ToArray();
+
+                type = type.MakeGenericType(genericParameters);
+            }
         }
 
         public DI(IDependencyConfiguration configuration)

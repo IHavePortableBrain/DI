@@ -16,7 +16,5 @@ namespace DependencyInjector.Configuration
         void Register(Type dependency, Type implementation, bool isSingleton = false, string name = null);
 
         IEnumerable<Implementation> GetImplementations(Type type);
-
-        IEnumerable<Implementation> GetAllRegisteredImplementations();
     }
 }

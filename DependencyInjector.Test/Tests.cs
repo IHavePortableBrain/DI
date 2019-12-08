@@ -148,12 +148,20 @@ namespace DependencyInjector.Test
         [TestMethod]
         public void OpenGenericDependencyTest()
         {
+            //configuration.Register<ArrayList, ArrayList>();
             configuration.Register(typeof(IGeneric<>), typeof(GenericImpl<>));
 
             DI = new DI(configuration);
-            var actual = DI.Resolve<IGeneric<ArrayList>>();
+            var actual = DI.Resolve<IGeneric<IEnumerable>>();
 
             Assert.AreEqual(typeof(GenericImpl<ArrayList>), actual.GetType());
+        }
+
+        [TestMethod]
+        public void ValidateGenericTypesCompatabilityWithCovariantTypesIsTrueTest()
+        {
+            configuration.ValidateRegistration(typeof(IGeneric<>), typeof(GenericImpl<>));
+            configuration.ValidateRegistration(typeof(IGeneric<IEnumerable>), typeof(GenericImpl<ArrayList>));
         }
 
         [TestMethod]
