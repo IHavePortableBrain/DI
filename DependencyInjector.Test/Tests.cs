@@ -224,5 +224,23 @@ namespace DependencyInjector.Test
             actual = DI.Resolve<I>("2");
             Assert.AreEqual(typeof(Impl2), actual.GetType());
         }
+
+        [TestMethod]
+        public void ExplicitConstructorParameterImplementationNameTest()
+        {
+            configuration.Register<I, Impl1>(name: "1");
+            configuration.Register<I, Impl2>(name: "2");
+
+            DI = new DI(configuration);
+
+            var actual = DI.Resolve<I>("1");
+            Assert.AreEqual(typeof(Impl1), actual.GetType());
+
+            actual = DI.Resolve<I>("2");
+            Assert.AreEqual(typeof(Impl2), actual.GetType());
+
+            actual = DI.Resolve<I>("notRegisteredName");
+            Assert.AreEqual(null, actual);
+        }
     }
 }

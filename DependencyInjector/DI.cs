@@ -78,7 +78,11 @@ namespace DependencyInjector
                     impls = Configuration.GetImplementations(dependency.GetGenericTypeDefinition())?.ToArray();
                 if (impls != null)
                 {
-                    result = impls.First().ResolveOrReturnSingletonInstance(this, name); //TODO: resolve dependency on GenericType of impl of open generic dependency
+                    Implementation implToUse = impls.First();
+                    if (name != null)
+                        implToUse = Array.Find(impls, impl => impl.Name == name);
+
+                    result = implToUse?.ResolveOrReturnSingletonInstance(this, name); //TODO: resolve dependency on GenericType of impl of open generic dependency
                 }
                 else //no implementation for that dependency, try make its instance
                     result = CreateByConstructor(dependency);
