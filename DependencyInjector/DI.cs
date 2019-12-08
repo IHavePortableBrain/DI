@@ -22,18 +22,10 @@ namespace DependencyInjector
 
             var result = Resolve(dependencyType, name);
 
-            //Type resType = result.GetType();
-            //Type depType = typeof(TDependency);
-            //if (resType.IsGenericType)
-            //{
-            //    depType.GetGenericArguments
-            //    resType.GetGenericTypeDefinition().
-            //}
-
             return (TDependency)result;//will cause cast error for generic dependencies wich are not covariant to their generic arguments
         }
 
-        private object Resolve(Type dependency, string name = null)
+        internal object Resolve(Type dependency, string name = null)
         {
             Implementation[] impls;
             object result = null;
@@ -75,7 +67,7 @@ namespace DependencyInjector
                 var implInstances = (object[])Activator.CreateInstance(dependencyType.MakeArrayType(), new object[] { impls.Count() });
                 for (int i = 0; i < impls.Count(); i++)
                 {
-                    implInstances[i] = Resolve(impls[i].Type, name);
+                    implInstances[i] = impls[i].ResolveOrReturnSingletonInstance(this, name);
                 }
                 result = implInstances;
             }
@@ -86,7 +78,7 @@ namespace DependencyInjector
                     impls = Configuration.GetImplementations(dependency.GetGenericTypeDefinition())?.ToArray();
                 if (impls != null)
                 {
-                    result = Resolve(impls.First().Type); //TODO: resolve dependency on GenericType of impl of open generic dependency
+                    result = impls.First().ResolveOrReturnSingletonInstance(this, name); //TODO: resolve dependency on GenericType of impl of open generic dependency
                 }
                 else //no implementation for that dependency, try make its instance
                     result = CreateByConstructor(dependency);

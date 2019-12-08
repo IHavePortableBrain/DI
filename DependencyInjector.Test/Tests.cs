@@ -29,11 +29,12 @@ namespace DependencyInjector.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(MissingMethodException))]
         public void NoImplementationForSuchDependencyTest()
         {
             DI = new DI(configuration);
             var actual = DI.Resolve<I>();
+
+            Assert.AreEqual(null, actual);
         }
 
         [TestMethod]

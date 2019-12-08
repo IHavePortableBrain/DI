@@ -19,5 +19,24 @@ namespace DependencyInjector.Configuration
             Name = name;
             SingletonInstance = singletonInstance;
         }
+
+        internal object ResolveOrReturnSingletonInstance(DI di, string name)
+        {
+            object instance;
+            if (IsSingleton)
+            {
+                if (SingletonInstance == null)
+                {
+                    instance = di.Resolve(Type, name);
+                    SingletonInstance = instance;
+                }
+                else
+                    instance = SingletonInstance;
+            }
+            else
+                instance = di.Resolve(Type, name);
+
+            return instance;
+        }
     }
 }
