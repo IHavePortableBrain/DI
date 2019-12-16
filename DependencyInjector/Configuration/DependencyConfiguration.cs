@@ -9,15 +9,9 @@ namespace DependencyInjector.Configuration
 {
     public class DependencyConfiguration : IDependencyConfiguration
     {
-        private readonly ConcurrentDictionary<Type, List<Implementation>> ImplsByDependencyType = new ConcurrentDictionary<Type, List<Implementation>>();
+        private readonly ConcurrentDictionary<Type, List<Implementation>> ImplsByDependencyType
+            = new ConcurrentDictionary<Type, List<Implementation>>();
 
-        //dont, change return value
-        internal IEnumerable<Implementation> GetAllRegisteredImplementations()
-        {
-            throw new NotImplementedException();
-        }
-
-        //use it to set singleton instance for implementation
         public IEnumerable<Implementation> GetImplementations(Type type)
         {
             ImplsByDependencyType.TryGetValue(type, out List<Implementation> result);
@@ -35,9 +29,7 @@ namespace DependencyInjector.Configuration
         {
             ValidateRegistration(dependency, implementation, isSingleton, name);
 
-            List<Implementation> impls;
-
-            if (!ImplsByDependencyType.TryGetValue(dependency, out impls))
+            if (!ImplsByDependencyType.TryGetValue(dependency, out List<Implementation> impls))
             {
                 impls = new List<Implementation>();
                 ImplsByDependencyType[dependency] = impls;
@@ -53,8 +45,7 @@ namespace DependencyInjector.Configuration
         {
             if (!dependency.IsAssignableFrom(implementation)
                     && !(dependency.IsGenericTypeDefinition && implementation.IsGenericTypeDefinition
-                        && IsAssignableFromAsOpenGeneric(dependency, implementation))
-                    )
+                        && IsAssignableFromAsOpenGeneric(dependency, implementation)))
                 throw new ArgumentException("Invalid dependency registration types");
 
             if (!dependency.IsClass && !dependency.IsInterface
@@ -62,9 +53,9 @@ namespace DependencyInjector.Configuration
                 throw new ArgumentException("Invalid dependency registration types");
         }
 
-        public bool IsAssignableFromAsOpenGeneric(Type type, Type c)
+        public bool IsAssignableFromAsOpenGeneric(Type leftValueType, Type rightValueType)
         {
-            if (!type.IsGenericTypeDefinition || !c.IsGenericTypeDefinition)
+            if (!leftValueType.IsGenericTypeDefinition || !rightValueType.IsGenericTypeDefinition)
             {
                 throw new ArgumentException("Specified types should be generic");
             }
@@ -72,7 +63,7 @@ namespace DependencyInjector.Configuration
             Type comparedType, baseType;
 
             Queue<Type> baseTypes = new Queue<Type>();
-            baseTypes.Enqueue(c);
+            baseTypes.Enqueue(rightValueType);
 
             bool result;
 
@@ -89,7 +80,7 @@ namespace DependencyInjector.Configuration
                 {
                     baseTypes.Enqueue(baseInterface.GetGenericTypeDefinition());
                 }
-                result = comparedType == type;
+                result = comparedType == leftValueType;
             } while (!result && (baseTypes.Count > 0));
 
             return result;

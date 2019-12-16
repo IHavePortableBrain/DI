@@ -13,6 +13,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.Loader;
 using System.Collections;
+using System.Threading;
 
 namespace DependencyInjector.Test
 {
@@ -230,8 +231,8 @@ namespace DependencyInjector.Test
         {
             configuration.Register<I, Impl2>(name: "2");
             configuration.Register<I, Impl1>(name: "1");
-            configuration.Register<NamedDependencyConstructorImpl, NamedDependencyConstructorImpl>();
-            configuration.Register<BadNamedDependencyConstructorImpl, BadNamedDependencyConstructorImpl>();
+            //configuration.Register<NamedDependencyConstructorImpl, NamedDependencyConstructorImpl>();
+            //configuration.Register<BadNamedDependencyConstructorImpl, BadNamedDependencyConstructorImpl>();
 
             DI = new DI(configuration);
 
@@ -242,6 +243,34 @@ namespace DependencyInjector.Test
             var actual2 = DI.Resolve<BadNamedDependencyConstructorImpl>();
             Assert.AreEqual(null, actual2.I1);
             Assert.AreEqual(typeof(Impl2), actual2.I2.GetType());
+        }
+
+        [TestMethod]
+        public void MultiThreadUseTest()
+        {
+            const int ThreadCount = 3;
+            configuration.Register<I, Impl1>(true);
+
+            DI = new DI(configuration);
+            Action resolveImpl1 = delegate
+            {
+                var first = DI.Resolve<I>();
+                var second = DI.Resolve<I>();
+                Assert.AreSame(first, second);
+            };
+
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < ThreadCount; i++)
+            {
+                Thread thread = new Thread(new ThreadStart(resolveImpl1));
+                threads.Add(thread);
+                thread.Start();
+            }
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
         }
     }
 }
